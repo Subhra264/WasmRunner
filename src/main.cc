@@ -10,7 +10,16 @@ int PrintError(std::string msg) {
 }
 
 void PrintHelp() {
-
+   std::cout << "USAGE" << std::endl;
+   std::cout << "\ttool [version] [-h | --help] [--reactor] [run]" << std::endl;
+   std::cout << "\t     [path_to_wasm_file] [entry_function] [args]" << std::endl;
+   std::cout << "\nOptions" << std::endl;
+   std::cout << "\t--reactor  \t\tOptional. If specified entry function must be given after file path" << std::endl;
+   std::cout << "\t-h | --help\t\tIgnores all other options and prints the help message" << std::endl;
+   std::cout << "\nCommands" << std::endl;
+   std::cout << "\tversion\t\t\tPrints the version of the WasmEdge library used" << std::endl;
+   std::cout << "\t       \t\t\tand ignores all the other commands and options" << std::endl;
+   std::cout << "\trun    \t\t\tOptional. Runs the Wasm file given as the next argument" << std::endl;
 }
 
 int PrintResult(std::vector<std::string> returns) {
