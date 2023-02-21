@@ -17,6 +17,7 @@ int PrintResult(std::vector<std::string> returns) {
    for(auto result: returns) {
       std::cout << result << " ";
    }
+   std::cout << std::endl;
    return 0;
 }
 
@@ -31,7 +32,6 @@ int main(int Argc, const char* Argv[]) {
       bool reactor_enabled = false;
       int file_name_index = 0;
       int file_params_index = file_name_index + 1;
-      // int entry_func_index = -1;
 
       if (args[0] == "version") {
          std::cout << WasmRunner::GetVersion() << std::endl;
@@ -42,7 +42,6 @@ int main(int Argc, const char* Argv[]) {
       } else if (args[0] == "--reactor") {
          reactor_enabled = true;
          file_name_index = 1;
-         // entry_func_index = file_name_index + 1;
       }
 
       if (args.size() <= file_name_index) return PrintError("File name must be given!");
@@ -50,7 +49,6 @@ int main(int Argc, const char* Argv[]) {
       if (args[file_name_index] == "run") file_name_index += 1;
 
       if (args.size() > file_name_index) {
-         // file_name = args[file_name_index];
          file_params_index = file_name_index + 1;
 
          if (reactor_enabled) {
@@ -79,39 +77,9 @@ int main(int Argc, const char* Argv[]) {
       wasmRunner->ValidateVM();
       wasmRunner->InstantiateVM();
 
-      wasmRunner->RunWasm(params, reactor_enabled, entry_func);
+      return wasmRunner->RunWasm(params, reactor_enabled, entry_func);
 
-   } else {
-      return PrintError("Too many arguments!");
    }
 
-   // std::cout<<Argc<<"  "<<Argv[0]<<std::endl;
-   // std::cout<<"WasmEdge version: "<<WasmRunner::GetVersion()<<std::endl;
-
-   // WasmEdge_ConfigureContext *ConfCxt = WasmEdge_ConfigureCreate();
-   // WasmEdge_ConfigureAddHostRegistration(ConfCxt, WasmEdge_HostRegistration_Wasi);
-   // /* The configure and store context to the VM creation can be NULL. */
-   // WasmEdge_VMContext *VMCxt = WasmEdge_VMCreate(ConfCxt, NULL);
-
-   // /* The parameters and returns arrays. */
-   // WasmEdge_Value Params[1] = { WasmEdge_ValueGenI32(32) };
-   // WasmEdge_Value Returns[1];
-   // /* Function name. */
-   // WasmEdge_String FuncName = WasmEdge_StringCreateByCString("fib");
-   // /* Run the WASM function from file. */
-   // WasmEdge_Result Res = WasmEdge_VMRunWasmFromFile(VMCxt, Argv[1], FuncName, Params, 1, Returns, 1);
-
-   // if (WasmEdge_ResultOK(Res)) {
-   //    std::cout<<"Get result: "<<WasmEdge_ValueGetI32(Returns[0])<<std::endl;
-   // } else {
-   //    std::cout<<"Error message: "<<WasmEdge_ResultGetMessage(Res)<<std::endl;
-   // }
-
-   // /* Resources deallocations. */
-   // WasmEdge_VMDelete(VMCxt);
-   // WasmEdge_ConfigureDelete(ConfCxt);
-   // WasmEdge_StringDelete(FuncName);
-   // std::cout<<"Main is working!"<<std::endl;
-   
-   return 0;
+   return PrintError("Too many arguments!");
 }

@@ -48,61 +48,69 @@ int WasmRunner::ExecuteEntryFunc(std::vector<std::string> &params, const WasmEdg
 {
    const WasmEdge_FunctionTypeContext *FuncType =
       WasmEdge_VMGetFunctionType(mVMCxt, EntryFuncName);
+
+   if (FuncType == NULL) return mFailureFunctor("Entry function not found!");
+
    const uint32_t BUFFER_LENGTH = 62; // As we are handling only a total of 64 arguments
    std::vector<WasmEdge_ValType> ParamTypeList(BUFFER_LENGTH);
    std::vector<WasmEdge_ValType> ReturnTypeList(BUFFER_LENGTH);
-   // WasmEdge_ValType *ParamTypeList = new WasmEdge_ValType[BUFFER_LENGTH];
-   // WasmEdge_ValType *ReturnTypeList = new WasmEdge_ValType[BUFFER_LENGTH];
 
-   const uint32_t params_length =
+   const uint32_t ParamsLength =
       WasmEdge_FunctionTypeGetParameters(FuncType, ParamTypeList.data(), BUFFER_LENGTH);
-   const uint32_t returns_length =
+   const uint32_t ReturnsLength =
       WasmEdge_FunctionTypeGetReturns(FuncType, ReturnTypeList.data(), BUFFER_LENGTH);
-   std::vector<WasmEdge_Value> Params(params_length);
-   std::vector<WasmEdge_Value> Returns(returns_length);
-   // WasmEdge_Value *Params = new WasmEdge_Value[params_length];
-   // WasmEdge_Value *Returns = new WasmEdge_Value[returns_length];
 
+   if (ParamsLength > params.size()) {
+      return mFailureFunctor("Too few arguments given!");
+   }
 
-   for(uint32_t i = 0; i < params_length; i++) {
-      switch (ParamTypeList[i])
-      {
-         case WasmEdge_ValType::WasmEdge_ValType_I32:
-            // All int32_t values can be safely stored
-            // as a long value (4 bytes for 32 bit or 8 bytes for 64 bit systems)
-            Params[i] = WasmEdge_ValueGenI32(static_cast<int32_t>(std::stol(params[i])));
-            break;
-         case WasmEdge_ValType::WasmEdge_ValType_I64:
-            Params[i] = WasmEdge_ValueGenI64(std::stol(params[i]));
-            break;
-         case WasmEdge_ValType::WasmEdge_ValType_F32:
-            Params[i] = WasmEdge_ValueGenF32(std::stof(params[i]));
-            break;
-         case WasmEdge_ValType::WasmEdge_ValType_F64:
-            Params[i] = WasmEdge_ValueGenF64(std::stod(params[i]));
-            break;
-         default:
-            // TODO: Print not yet supported error message
-            break;
+   std::vector<WasmEdge_Value> Params(ParamsLength);
+   std::vector<WasmEdge_Value> Returns(ReturnsLength);
+
+   for(uint32_t i = 0; i < ParamsLength; i++) {
+
+      try {
+         switch (ParamTypeList[i])
+         {
+            case WasmEdge_ValType::WasmEdge_ValType_I32:
+               // All int32_t values can be safely stored
+               // as a long value (4 bytes for 32 bit or 8 bytes for 64 bit systems)
+               Params[i] = WasmEdge_ValueGenI32(static_cast<int32_t>(std::stol(params[i])));
+               break;
+            case WasmEdge_ValType::WasmEdge_ValType_I64:
+               Params[i] = WasmEdge_ValueGenI64(std::stol(params[i]));
+               break;
+            case WasmEdge_ValType::WasmEdge_ValType_F32:
+               Params[i] = WasmEdge_ValueGenF32(std::stof(params[i]));
+               break;
+            case WasmEdge_ValType::WasmEdge_ValType_F64:
+               Params[i] = WasmEdge_ValueGenF64(std::stod(params[i]));
+               break;
+            default:
+               return mFailureFunctor("No other function parameter types supported for now!");
+         }
+      } catch(...) {
+         return mFailureFunctor("Error parsing the passed arguments!");
       }
    }
 
-   WasmEdge_VMExecute(mVMCxt,
+   WasmEdge_Result Result = WasmEdge_VMExecute(mVMCxt,
                      EntryFuncName,
                      Params.data(),
-                     params_length,
+                     ParamsLength,
                      Returns.data(),
-                     returns_length);
+                     ReturnsLength);
 
-   // WasmEdge_Value
-   std::vector<std::string> returns(returns_length);
+   if (!WasmEdge_ResultOK(Result)) {
+      return mFailureFunctor(WasmEdge_ResultGetMessage(Result));
+   }
 
-   for(uint32_t i = 0; i < returns_length; i++) {
+   std::vector<std::string> returns(ReturnsLength);
+
+   for(uint32_t i = 0; i < ReturnsLength; i++) {
       switch (ReturnTypeList[i])
       {
          case WasmEdge_ValType::WasmEdge_ValType_I32:
-            // All int32_t values can be safely stored
-            // as a long value (4 bytes for 32 bit or 8 bytes for 64 bit systems)
             returns.push_back(std::to_string(WasmEdge_ValueGetI32(Returns[i])));
             break;
          case WasmEdge_ValType::WasmEdge_ValType_I64:
@@ -115,8 +123,7 @@ int WasmRunner::ExecuteEntryFunc(std::vector<std::string> &params, const WasmEdg
             returns.push_back(std::to_string(WasmEdge_ValueGetF64(Returns[i])));
             break;
          default:
-            // TODO: Print not yet supported error message
-            break;
+            return mFailureFunctor("No other function return types supported for now!");
       }
    }
 
@@ -131,9 +138,6 @@ int WasmRunner::RunWasmReactor(std::vector<std::string> &params, std::string ent
    });
 
    return ExecuteEntryFunc(params, EntryFuncName);
-
-   // WasmEdge_StringDelete(EntryFuncName);
-   // return 0; // TODO: Return the given function
 }
 
 int WasmRunner::RunWasmCommand(std::vector<std::string> &params)
@@ -145,6 +149,5 @@ int WasmRunner::RunWasmCommand(std::vector<std::string> &params)
    uint32_t RealFuncNum =
       WasmEdge_VMGetFunctionList(mVMCxt, FuncNames, (const WasmEdge_FunctionTypeContext **)FuncTypes, BUF_LEN);
 
-   // WasmEdge_Value Value = WasmEdge_ValueGenI32()
    return ExecuteEntryFunc(params, FuncNames[0]);
 }
