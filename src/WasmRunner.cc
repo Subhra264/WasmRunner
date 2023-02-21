@@ -22,19 +22,31 @@ const char *WasmRunner::GetVersion()
    return WasmEdge_VersionGet();
 }
 
-void WasmRunner::LoadWasmFile(std::string file_name)
+bool WasmRunner::LoadWasmFile(std::string file_name)
 {
-   WasmEdge_VMLoadWasmFromFile(mVMCxt, file_name.c_str());
+   WasmEdge_Result Result = WasmEdge_VMLoadWasmFromFile(mVMCxt, file_name.c_str());
+
+   if (!WasmEdge_ResultOK(Result))
+      return !mFailureFunctor(WasmEdge_ResultGetMessage(Result));
+   return true;
 }
 
-void WasmRunner::ValidateVM()
+bool WasmRunner::ValidateVM()
 {
-   WasmEdge_VMValidate(mVMCxt);
+   WasmEdge_Result Result = WasmEdge_VMValidate(mVMCxt);
+
+   if (!WasmEdge_ResultOK(Result))
+      return !mFailureFunctor(WasmEdge_ResultGetMessage(Result));
+   return true;
 }
 
-void WasmRunner::InstantiateVM()
+bool WasmRunner::InstantiateVM()
 {
-   WasmEdge_VMInstantiate(mVMCxt);
+   WasmEdge_Result Result = WasmEdge_VMInstantiate(mVMCxt);
+
+   if (!WasmEdge_ResultOK(Result))
+      return !mFailureFunctor(WasmEdge_ResultGetMessage(Result));
+   return true;
 }
 
 int WasmRunner::RunWasm(std::vector<std::string> &params, bool reactor_enabled, std::string entry_func = "")

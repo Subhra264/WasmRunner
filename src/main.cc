@@ -82,9 +82,10 @@ int main(int Argc, const char* Argv[]) {
       }
 
       std::unique_ptr<WasmRunner> wasmRunner(new WasmRunner(PrintResult, PrintError));
-      wasmRunner->LoadWasmFile(file_name);
-      wasmRunner->ValidateVM();
-      wasmRunner->InstantiateVM();
+      
+      if (!wasmRunner->LoadWasmFile(file_name)) return 1;
+      if (!wasmRunner->ValidateVM()) return 1;
+      if (!wasmRunner->InstantiateVM()) return 1;
 
       return wasmRunner->RunWasm(params, reactor_enabled, entry_func);
 

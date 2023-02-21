@@ -16,9 +16,9 @@ class WasmRunner {
       ~WasmRunner();
 
       static const char *GetVersion();
-      void LoadWasmFile(std::string file_name);
-      void ValidateVM();
-      void InstantiateVM();
+      bool LoadWasmFile(std::string file_name);
+      bool ValidateVM();
+      bool InstantiateVM();
       int RunWasm(std::vector<std::string> &params, bool reactor_enabled, std::string entry_func);
 
    private:
