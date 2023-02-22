@@ -7,6 +7,36 @@ A command line tool to execute WebAssembly files.
              [path_to_wasm_file] [entry_function] [args]
 ```
 
+## Building
+As this tool uses `wasmedge` C library as a dependency, it needs to be installed first. Refer to [this](https://wasmedge.org/book/en/quick_start/install.html) as a guide
+
+You can install it with `git` and `curl` -
+```bash
+curl -sSf https://raw.githubusercontent.com/WasmEdge/WasmEdge/master/utils/install.sh | bash
+```
+
+After you install it, clone this repo -
+```bash
+git clone https://github.com/Subhra264/WasmRunner.git
+```
+
+Move to the `/WasmRunner` directory -
+```bash
+cd WasmRunner/
+```
+
+Now simply execute the `build.sh` file -
+```bash
+./build.sh
+```
+
+Once the `build` directory is created, move to the directory and use the tool -
+```bash
+cd build
+
+./WasmRunner version
+```
+
 ## How is this built?
 
 This tool is completely based on the `wasmedge` C library SDK and is written in C++11. There are two files in the `/src` directory -
@@ -66,7 +96,7 @@ Executes the given wasm file.
 - `int` - If `0`, the operation was successful and not successful otherwise.
 
 ## Commands
-Following are various commands to use this tool.
+Following are various commands to use with this tool.
 
 ### Version
 Prints the version of the underlying `wasmedge` library. All other commands and options are ignored when this command is run.
