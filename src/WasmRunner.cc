@@ -25,6 +25,7 @@ const char *WasmRunner::GetVersion()
 bool WasmRunner::LoadWasmFile(std::string file_name)
 {
    WasmEdge_Result Result = WasmEdge_VMLoadWasmFromFile(mVMCxt, file_name.c_str());
+   // file = file_name;
 
    if (!WasmEdge_ResultOK(Result))
       return !mFailureFunctor(WasmEdge_ResultGetMessage(Result));
@@ -112,6 +113,27 @@ int WasmRunner::ExecuteEntryFunc(std::vector<std::string> &params, const WasmEdg
                      ParamsLength,
                      Returns.data(),
                      ReturnsLength);
+
+   // WasmEdge_Result Result = WasmEdge_VMRunWasmFromFile(mVMCxt,
+   //                            file.c_str(),
+   //                            EntryFuncName,
+   //                            Params.data(),
+   //                            ParamsLength,
+   //                            Returns.data(),
+   //                            ReturnsLength);
+
+   // WasmEdge_Async *Async = WasmEdge_VMAsyncExecute(mVMCxt,
+   //                   EntryFuncName,
+   //                   Params.data(),
+   //                   ParamsLength);
+
+   // WasmEdge_Result Result = WasmEdge_AsyncGet(Async,
+   //                   Returns.data(),
+   //                   ReturnsLength);
+
+   // finally([&Async]() {
+   //    WasmEdge_AsyncDelete(Async);
+   // });
 
    if (!WasmEdge_ResultOK(Result)) {
       return mFailureFunctor(WasmEdge_ResultGetMessage(Result));

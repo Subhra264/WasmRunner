@@ -24,6 +24,7 @@ class WasmRunner {
    private:
       WasmEdge_VMContext *mVMCxt;
       WasmEdge_ConfigureContext *mConfCxt;
+      // std::string file;
 
       SuccessHandler mSuccessFunctor;
       ErrorHandler mFailureFunctor;
